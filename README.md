@@ -1,11 +1,13 @@
-# Remix TypeScript Template with Supabase Authentication and Authorization
+# Remix SaaS Template with Supabase and Stripe
 
-This template provides a starting point for building a Remix application with TypeScript, featuring authentication and authorization using Supabase. It includes:
+This template provides a starting point for building a SaaS (Software as a Service) application using Remix and TypeScript, featuring:
 
-- **User Authentication**: Signup, login, and logout functionality.
-- **Role-Based Authorization**: Protect routes based on user roles.
+- **User Authentication**: Signup, login, and logout functionality using Supabase.
+- **Subscription Management**: Integrate Stripe for handling subscriptions.
+- **Role-Based Authorization**: Protect routes based on user subscription status.
+- **Caching of Product Prices**: Improve performance by caching pricing data.
 - **Tailwind CSS Styling**: Pre-configured UI components for a modern look.
-- **Top Navigation Bar**: A responsive navbar that adapts to authentication state.
+- **Top Navigation Bar**: A responsive navbar that adapts to authentication and subscription state.
 - **Dockerized Deployment**: Simplified deployment using Docker and Docker Compose.
 
 ---
@@ -17,9 +19,10 @@ This template provides a starting point for building a Remix application with Ty
   - [1. Clone the Repository](#1-clone-the-repository)
   - [2. Install Dependencies](#2-install-dependencies)
   - [3. Supabase Setup](#3-supabase-setup)
-  - [4. Configure Environment Variables](#4-configure-environment-variables)
-  - [5. Run the Application](#5-run-the-application)
-  - [Docker Deployment](#docker-deployment)
+  - [4. Stripe Setup](#4-stripe-setup)
+  - [5. Configure Environment Variables](#5-configure-environment-variables)
+  - [6. Run the Application](#6-run-the-application)
+- [Docker Deployment](#docker-deployment)
   - [1. Build the Docker Image](#1-build-the-docker-image)
   - [2. Run the Docker Container](#2-run-the-docker-container)
   - [3. Using Docker Compose](#3-using-docker-compose)
@@ -27,8 +30,8 @@ This template provides a starting point for building a Remix application with Ty
 - [Available Scripts](#available-scripts)
 - [Usage](#usage)
   - [Authentication Pages](#authentication-pages)
+  - [Subscription Flow](#subscription-flow)
   - [Protected Routes](#protected-routes)
-  - [Authorization](#authorization)
 - [Styling](#styling)
 - [Security Considerations](#security-considerations)
 - [Contributing](#contributing)
@@ -43,6 +46,8 @@ Before you begin, ensure you have met the following requirements:
 - **Node.js**: Install Node.js (version 14 or higher)
 - **npm**: Comes with Node.js
 - **Supabase Account**: Sign up at [Supabase](https://supabase.com/)
+- **Stripe Account**: Sign up at [Stripe](https://stripe.com/)
+- **Docker**: Install Docker and Docker Compose if you plan to deploy using containers
 
 ---
 
@@ -51,8 +56,8 @@ Before you begin, ensure you have met the following requirements:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/sammyl720/remix-supabase-template.git
-cd remix-supabase-template
+git clone https://github.com/sammyl720/remix-saas.git
+cd remix-saas
 ```
 
 ### 2. Install Dependencies
@@ -79,16 +84,50 @@ npm install
 
 #### Set Up Database Schema
 
-In the Supabase SQL editor, run the following SQL command to create a `profiles` table:
+In the Supabase SQL editor, run the following SQL commands to create the `profiles` table and add subscription fields:
 
 ```sql
 create table profiles (
   id uuid references auth.users not null primary key,
-  role text default 'user'
+  email text not null,
+  role text default 'user',
+  stripe_customer_id text,
+  subscription_id text,
+  subscription_status text,
+  current_period_end timestamp with time zone
 );
 ```
 
-### 4. Configure Environment Variables
+### 4. Stripe Setup
+
+#### Create a Stripe Account
+
+- Sign up at [Stripe](https://dashboard.stripe.com/register) if you haven't already.
+- Access your [Stripe Dashboard](https://dashboard.stripe.com/).
+
+#### Create Products and Pricing Plans
+
+- Navigate to **Products**.
+- Create two products: **Basic** and **Pro**.
+- For each product, create a recurring pricing plan:
+  - **Basic Plan**: e.g., $10/month.
+  - **Pro Plan**: e.g., $20/month.
+- Note the **Price IDs** for each plan (e.g., `price_1KXYZ...`).
+
+#### Configure Webhooks
+
+- Go to **Developers > Webhooks**.
+- Add a new webhook endpoint:
+  - **URL**: `http://localhost:5173/webhooks/stripe` (use your production URL when deploying).
+  - **Events to Listen For**:
+    - `checkout.session.completed`
+    - `invoice.paid`
+    - `invoice.payment_failed`
+    - `customer.subscription.updated`
+    - `customer.subscription.deleted`
+- After creating the webhook endpoint, Stripe will provide a **Signing Secret** (e.g., `whsec_...`). Keep this secret; you'll need it later.
+
+### 5. Configure Environment Variables
 
 Create a `.env` file in the root directory and add the following:
 
@@ -97,12 +136,17 @@ SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 SESSION_SECRET=your_session_secret
+PORT=5173
+
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+APP_URL=http://localhost:5173
 ```
 
-- **Replace** `your_supabase_url`, `your_supabase_anon_key`, and `your_supabase_service_role_key` with the values from your Supabase project.
+- **Replace** placeholders with actual values from your Supabase and Stripe accounts.
 - **Generate** a strong, random string for `SESSION_SECRET`.
 
-### 5. Run the Application
+### 6. Run the Application
 
 Start the development server:
 
@@ -198,16 +242,24 @@ docker-compose up --build
 │   │   ├── login.tsx         # Login page
 │   │   ├── logout.ts         # Logout action
 │   │   ├── signup.tsx        # Signup page
-│   │   └── unauthorized.tsx  # Unauthorized access page
+│   │   ├── pricing.tsx         # Pricing page with subscription plans
+│   │   ├── checkout.ts         # Stripe checkout session creation
+│   │   ├── success.tsx         # Subscription success page
+│   │   ├── pro-page.tsx        # Protected page for Pro users
+│   │   └── webhooks
+│   │       └── stripe.ts       # Stripe webhook handler
 │   ├── styles
 │   │   └── tailwind.css      # Tailwind CSS styles
 │   └── utils
+│       ├── cache.server.ts     # Cache utility for pricing data
 │       ├── session.server.ts # Session management
 │       ├── supabaseClient.ts # Client-side Supabase client
 │       └── supabaseServer.ts # Server-side Supabase client
 ├── public
 │   └── build                 # Built assets
 ├── .env                      # Environment variables
+├── .eslintrc.cjs               # ESLint configuration
+├── .prettierrc                 # Prettier configuration
 ├── Dockerfile                # Docker configuration
 ├── docker-compose.yml        # Docker Compose configuration
 ├── .dockerignore             # Files to ignore in Docker context
@@ -224,6 +276,8 @@ docker-compose up --build
 - `npm run dev`: Start the development server.
 - `npm run build`: Build the app for production.
 - `npm start`: Run the built app in production mode.
+- `npm run format`: Format code using Prettier.
+- `npm run lint`: Check for linting errors.
 - `docker build -t my-remix-app .`: Build the Docker image.
 - `docker run -p 3000:3000 --env-file .env my-remix-app`: Run the Docker container.
 - `docker-compose up --build`: Build and run the application using Docker Compose
@@ -238,15 +292,19 @@ docker-compose up --build
 - **Login**: Visit `/login` to sign in.
 - **Logout**: Click the **Logout** button in the navigation bar to sign out.
 
+### Subscription Flow
+
+1. **Pricing Page**: Visit `/pricing` to view subscription plans.
+2. **Select Plan**: Choose between **Basic** and **Pro** plans.
+3. **Checkout**: Complete the payment process via Stripe's secure checkout.
+4. **Success Page**: After successful payment, you'll be redirected to `/success`.
+5. **Access Protected Content**: Based on your subscription, access content available to your plan.
+
 ### Protected Routes
 
 - **Home Page** (`/`): Accessible only to authenticated users.
+- **Pro Page** (`/pro-page`): Accessible only to users with an active **Pro** subscription.
 - **Unauthorized Access**: Attempting to access restricted pages without proper authorization redirects to `/unauthorized`.
-
-### Authorization
-
-- **User Roles**: Roles are stored in the `profiles` table.
-- **Role-Based Access**: Modify the `role` field in the `profiles` table to manage access levels.
 
 ---
 
@@ -254,17 +312,19 @@ docker-compose up --build
 
 - **Tailwind CSS**: Used for styling components.
 - **Forms**: Enhanced with focus states, hover effects, and responsive design.
-- **Navigation Bar**: Adapts based on authentication state (shows Login/Signup or Logout).
+- **Navigation Bar**: Adapts based on authentication and subscription state (shows Login/Signup, Upgrade, or Logout).
 
 ---
 
 ## Security Considerations
 
 - **Environment Variables**: Do not commit the `.env` file to version control.
-- **Supabase Keys**: Keep your `SUPABASE_SERVICE_ROLE_KEY` secure and use it only on the server side.
+- **Supabase Keys**: Keep your `SUPABASE_SERVICE_ROLE_KEY` and other keys secure.
+- **Stripe Secret Key**: Ensure your `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are kept secure and not exposed to the client.
 - **Session Secret**: Use a strong, unique secret for `SESSION_SECRET`.
 - **HTTPS**: Ensure the app is served over HTTPS in production.
-- **Session Handling**: Properly destroy sessions on logout to prevent session fixation attacks.
+- **Webhook Verification**: Always verify webhook signatures from Stripe.
+- **Access Control**: Thoroughly test your access control logic to prevent unauthorized access to protected resources.
 - **CSRF Protection**: Remix forms include CSRF protection by default.
 
 ---

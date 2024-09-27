@@ -22,9 +22,9 @@
   "author": "Shmuel Leider <sam.leider@hotmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sammyl720/remix-supabase-template/issues"
+    "url": "https://github.com/sammyl720/remix-saas/issues"
   },
-  "homepage": "https://github.com/sammyl720/remix-supabase-template#readme",
+  "homepage": "https://github.com/sammyl720/remix-saas#readme",
   "scripts": {
     "build": "remix vite:build",
     "dev": "remix vite:dev",
