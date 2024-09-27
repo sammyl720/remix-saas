@@ -1,7 +1,10 @@
 import { type ActionFunctionArgs, redirect } from '@remix-run/node';
 import { Form, useActionData } from '@remix-run/react';
 import { ActionError } from '~/types/action-error';
+import { redirectAuthenticatedUser } from '~/utils/loaders';
 import { supabaseServer } from '~/utils/supabaseServer';
+
+export const loader = redirectAuthenticatedUser('/');
 
 export const action = async ({ request }: ActionFunctionArgs ) => {
   const formData = await request.formData();

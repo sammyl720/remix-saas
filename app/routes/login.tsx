@@ -1,9 +1,12 @@
 // app/routes/login.tsx
-import type { ActionFunctionArgs } from '@remix-run/node';
-import { Form, useActionData } from '@remix-run/react';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { Form, redirect, useActionData } from '@remix-run/react';
 import { supabaseServer } from '~/utils/supabaseServer';
-import { createUserSession } from '~/utils/session.server';
+import { createUserSession, getUser } from '~/utils/session.server';
 import { ActionError } from '~/types/action-error';
+import { redirectAuthenticatedUser } from '~/utils/loaders';
+
+export const loader = redirectAuthenticatedUser('/');
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
