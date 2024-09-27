@@ -1,9 +1,20 @@
+import { LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
 import Stripe from 'stripe';
 import { PricingData } from '~/types/pricing-data';
 import { getCache, setCache } from '~/utils/cache.server';
+import { getUser } from '~/utils/session.server';
 
-export const loader = async () => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const user = await getUser(request);
+  if (!user) {
+    return redirect(`/login?redirect_url=pricing`);
+  }
+
+  if (user.profile?.subscription_status === 'active') {
+    return redirect('/pro-page');
+  }
+
   const cacheKey = 'pricingData';
 
   const cachedData = getCache<PricingData[]>(cacheKey);

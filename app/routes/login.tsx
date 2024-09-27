@@ -1,10 +1,11 @@
 // app/routes/login.tsx
 import type { ActionFunctionArgs } from '@remix-run/node';
-import { Form, useActionData } from '@remix-run/react';
+import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import { supabaseServer } from '~/utils/supabaseServer';
 import { createUserSession } from '~/utils/session.server';
 import { ActionError } from '~/types/action-error';
 import { redirectAuthenticatedUser } from '~/utils/loaders';
+import { isValidRedirectRoute } from '~/utils/redirects';
 
 export const loader = redirectAuthenticatedUser('/');
 
@@ -12,6 +13,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const redirectRoute = (formData.get('redirect') as string) ?? '';
 
   const { data, error } = await supabaseServer.auth.signInWithPassword({
     email,
@@ -22,15 +24,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return { error: error.message };
   }
 
+  const redirectTo = isValidRedirectRoute(redirectRoute)
+    ? `/${redirectRoute}`
+    : '/';
   return createUserSession(
     data.session?.access_token,
     data.session?.refresh_token,
-    '/'
+    redirectTo
   );
 };
 
 export default function Login() {
   const actionData = useActionData<ActionError>();
+  const data = useLoaderData<typeof loader>();
+
   return (
     <div className="max-w-md mx-auto mt-12 bg-white dark:bg-teal-950 p-8 rounded shadow">
       <h1 className="text-3xl font-bold mb-6 text-center">Welcome Back</h1>
@@ -70,6 +77,9 @@ export default function Login() {
             className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+        {data?.redirectURL && (
+          <input type="hidden" name="redirect" value={data.redirectURL} />
+        )}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white p-3 rounded font-medium hover:bg-blue-700 transition duration-200"

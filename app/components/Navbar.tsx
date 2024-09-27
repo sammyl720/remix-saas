@@ -5,6 +5,7 @@ import { UserProfile } from '~/types/profile';
 export default function Navbar() {
   const data = useLoaderData<{ user?: UserProfile }>();
   const user = data?.user;
+  const hasActiveSubscription = user?.profile?.subscription_status === 'active';
 
   return (
     <nav className="bg-white dark:bg-teal-950 shadow-md">
@@ -19,8 +20,11 @@ export default function Navbar() {
                 Hello, {user.email} (
                 {user.profile?.subscription_status || 'Free'})
               </span>
-              <Link to="/pricing" className="mr-4">
-                Upgrade
+              <Link
+                to={hasActiveSubscription ? '/pro-page' : '/pricing'}
+                className="mr-4"
+              >
+                {hasActiveSubscription ? 'Access Features' : 'Upgrade'}
               </Link>
               <Form method="post" action="/logout" className="inline">
                 <button
