@@ -46,8 +46,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       },
     ],
     mode: 'subscription',
-    success_url: `${process.env.APP_URL}:${process.env.PORT}/success`,
-    cancel_url: `${process.env.APP_URL}:${process.env.PORT}/pricing`,
+    success_url: `${process.env.APP_URL}/success`,
+    cancel_url: `${process.env.APP_URL}/pricing`,
   });
 
   // Redirect to the Stripe Checkout
