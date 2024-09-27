@@ -118,7 +118,8 @@ create table profiles (
 
 - Go to **Developers > Webhooks**.
 - Add a new webhook endpoint:
-  - **URL**: `http://localhost:5173/webhooks/stripe` (use your production URL when deploying).
+  - **URL**: `https://<hostname>/webhooks/stripe` (use your production URL when deploying).
+  - **Development**: Follow [Stripe Documentation](https://docs.stripe.com/webhooks#local-listener) for how to forward events to your local endpoint at `http://localhost:5173/webhooks/stripe`
   - **Events to Listen For**:
     - `checkout.session.completed`
     - `invoice.paid`
