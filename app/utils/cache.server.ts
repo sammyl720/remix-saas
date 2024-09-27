@@ -4,7 +4,7 @@ type CacheEntry<T> = {
   expiry: number;
 };
 
-const cache: { [key: string]: CacheEntry<any> } = {};
+const cache: { [key: string]: CacheEntry<unknown> } = {};
 
 // Set cache TTL (e.g., 1 hour)
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -17,7 +17,7 @@ export function setCache<T>(key: string, data: T, ttl = CACHE_TTL) {
 }
 
 export function getCache<T>(key: string): T | null {
-  const entry = cache[key];
+  const entry = cache[key] as CacheEntry<T>;
   if (!entry) {
     return null;
   }

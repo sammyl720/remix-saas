@@ -1,8 +1,8 @@
 // app/routes/login.tsx
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { Form, redirect, useActionData } from '@remix-run/react';
+import type { ActionFunctionArgs } from '@remix-run/node';
+import { Form, useActionData } from '@remix-run/react';
 import { supabaseServer } from '~/utils/supabaseServer';
-import { createUserSession, getUser } from '~/utils/session.server';
+import { createUserSession } from '~/utils/session.server';
 import { ActionError } from '~/types/action-error';
 import { redirectAuthenticatedUser } from '~/utils/loaders';
 
@@ -23,8 +23,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   return createUserSession(
-    data.session?.access_token!,
-    data.session?.refresh_token!,
+    data.session?.access_token,
+    data.session?.refresh_token,
     '/'
   );
 };
@@ -78,7 +78,7 @@ export default function Login() {
         </button>
       </Form>
       <p className="mt-6 text-center text-gray-600">
-        Don't have an account?{' '}
+        Don&#39;t have an account?{' '}
         <a href="/signup" className="text-blue-600 hover:underline">
           Sign Up
         </a>

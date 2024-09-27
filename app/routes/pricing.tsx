@@ -1,10 +1,9 @@
-import { LoaderFunctionArgs } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
 import Stripe from 'stripe';
 import { PricingData } from '~/types/pricing-data';
 import { getCache, setCache } from '~/utils/cache.server';
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async () => {
   const cacheKey = 'pricingData';
 
   const cachedData = getCache<PricingData[]>(cacheKey);
@@ -15,9 +14,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-    // Fetch all active products
-    const products = await stripe.products.list({ active: true });
 
     // Fetch prices for the products
     const prices = await stripe.prices.list({

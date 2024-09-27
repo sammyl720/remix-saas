@@ -1,6 +1,4 @@
-// app/routes/webhooks/stripe.ts
-import { ActionFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { ActionFunctionArgs, json } from '@remix-run/node';
 import Stripe from 'stripe';
 import { deleteCache } from '~/utils/cache.server';
 import { supabaseServer } from '~/utils/supabaseServer';
@@ -17,8 +15,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed.`, err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error)
+      console.error(`Webhook signature verification failed.`, err.message);
     return json({ error: 'Webhook signature verification failed.' }, 400);
   }
 
@@ -26,7 +25,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   switch (event.type) {
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
-    case 'customer.subscription.deleted':
+    case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
       // Update subscription details in Supabase
       await supabaseServer
@@ -38,6 +37,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         })
         .eq('stripe_customer_id', subscription.customer as string);
       break;
+    }
     case 'product.updated':
     case 'price.updated':
     case 'product.created':
