@@ -42,7 +42,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     case 'price.updated':
     case 'product.created':
     case 'price.created':
-      deleteCache("pricingData");
+      deleteCache('pricingData');
       break;
     // ... handle other event types as needed
     default:

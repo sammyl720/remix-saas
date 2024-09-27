@@ -7,21 +7,26 @@ if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set');
 }
 
-const { getSession, commitSession, destroySession } = createCookieSessionStorage({
-  cookie: {
-    name: '__session',
-    secure: process.env.NODE_ENV === 'production',
-    secrets: [sessionSecret],
-    sameSite: 'lax',
-    path: '/',
-    httpOnly: true,
-  },
-});
+const { getSession, commitSession, destroySession } =
+  createCookieSessionStorage({
+    cookie: {
+      name: '__session',
+      secure: process.env.NODE_ENV === 'production',
+      secrets: [sessionSecret],
+      sameSite: 'lax',
+      path: '/',
+      httpOnly: true,
+    },
+  });
 
 export { getSession, commitSession, destroySession };
 
 // Helper functions
-export async function createUserSession(accessToken: string, refreshToken: string, redirectTo: string) {
+export async function createUserSession(
+  accessToken: string,
+  refreshToken: string,
+  redirectTo: string
+) {
   const session = await getSession();
   session.set('access_token', accessToken);
   session.set('refresh_token', refreshToken);
@@ -32,7 +37,7 @@ export async function createUserSession(accessToken: string, refreshToken: strin
   });
 }
 
-export async function getUser(request: Request): Promise<UserProfile | null > {
+export async function getUser(request: Request): Promise<UserProfile | null> {
   const session = await getSession(request.headers.get('Cookie'));
   const accessToken = session.get('access_token');
 
@@ -40,7 +45,7 @@ export async function getUser(request: Request): Promise<UserProfile | null > {
 
   const { data, error } = await supabaseServer.auth.getUser(accessToken);
 
-  if (error || !data.user ) return null;
+  if (error || !data.user) return null;
 
   const { data: profile }: { data: Profile | null } = await supabaseServer
     .from('profiles')

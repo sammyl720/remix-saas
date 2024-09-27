@@ -10,23 +10,23 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cachedData = getCache<PricingData[]>(cacheKey);
 
   if (cachedData) {
-    return { pricingData: cachedData }
+    return { pricingData: cachedData };
   }
 
   try {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-      // Fetch all active products
-      const products = await stripe.products.list({ active: true });
-    
-      // Fetch prices for the products
-      const prices = await stripe.prices.list({
-        active: true,
-        expand: ['data.product'],
-      });
+    // Fetch all active products
+    const products = await stripe.products.list({ active: true });
 
-      // Combine products and prices
-      const pricingData: PricingData[] = prices.data
+    // Fetch prices for the products
+    const prices = await stripe.prices.list({
+      active: true,
+      expand: ['data.product'],
+    });
+
+    // Combine products and prices
+    const pricingData: PricingData[] = prices.data
       .filter((price) => price.type === 'recurring')
       .map((price) => {
         const product = price.product as Stripe.Product;
@@ -36,15 +36,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           unitAmount: price.unit_amount,
           interval: price.recurring?.interval,
           currency: price.currency,
-          description: product.description
-        }
+          description: product.description,
+        };
       })
       .filter((pricing) => !!pricing.unitAmount)
-      .sort((priceA, priceB) => priceA.unitAmount! > priceB.unitAmount! ? -1 : 1)
+      .sort((priceA, priceB) =>
+        priceA.unitAmount! > priceB.unitAmount! ? -1 : 1
+      );
 
     // Store data in cache
     setCache(cacheKey, pricingData);
-    
+
     return { pricingData };
   } catch (error) {
     console.error('Error fetching pricing data:', error);
@@ -60,7 +62,10 @@ export default function Pricing() {
       <h1 className="text-3xl font-bold mb-6 text-center">Choose Your Plan</h1>
       <div className="flex justify-center space-x-6 flex-wrap">
         {pricingData.map((plan) => (
-          <div key={plan.priceId} className="bg-white dark:bg-teal-950 p-6 rounded shadow w-64 mb-6">
+          <div
+            key={plan.priceId}
+            className="bg-white dark:bg-teal-950 p-6 rounded shadow w-64 mb-6"
+          >
             <h2 className="text-2xl font-bold mb-4">{plan.productName}</h2>
             <p className="text-xl mb-6">
               {(plan.unitAmount! / 100).toLocaleString('en-US', {

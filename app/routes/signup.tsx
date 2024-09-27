@@ -6,7 +6,7 @@ import { supabaseServer } from '~/utils/supabaseServer';
 
 export const loader = redirectAuthenticatedUser('/');
 
-export const action = async ({ request }: ActionFunctionArgs ) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
@@ -21,7 +21,9 @@ export const action = async ({ request }: ActionFunctionArgs ) => {
   }
 
   // Create user profile with default role
-  await supabaseServer.from('profiles').insert([{ id: data.user?.id, role: 'user' }]);
+  await supabaseServer
+    .from('profiles')
+    .insert([{ id: data.user?.id, role: 'user' }]);
 
   return redirect('/login');
 };
@@ -36,7 +38,10 @@ export default function Signup() {
       )}
       <Form method="post" className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+          <label
+            htmlFor="email"
+            className="block text-gray-700 font-medium mb-2"
+          >
             Email Address
           </label>
           <input
@@ -49,7 +54,10 @@ export default function Signup() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
+          <label
+            htmlFor="password"
+            className="block text-gray-700 font-medium mb-2"
+          >
             Password
           </label>
           <input

@@ -155,13 +155,13 @@ Alternatively, you can use Docker Compose to manage the container.
 #### Create a `docker-compose.yml` File
 
 ```yaml
-version: "3.8"
+version: '3.8'
 
 services:
   app:
     build: .
     ports:
-      - "${PORT}:${PORT}"
+      - '${PORT}:${PORT}'
     env_file:
       - .env
     environment:

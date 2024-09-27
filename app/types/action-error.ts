@@ -1,3 +1,3 @@
 export interface ActionError {
-    error: string;
+  error: string;
 }

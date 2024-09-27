@@ -39,7 +39,10 @@ export default function Login() {
       )}
       <Form method="post" className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+          <label
+            htmlFor="email"
+            className="block text-gray-700 font-medium mb-2"
+          >
             Email Address
           </label>
           <input
@@ -52,7 +55,10 @@ export default function Login() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
+          <label
+            htmlFor="password"
+            className="block text-gray-700 font-medium mb-2"
+          >
             Password
           </label>
           <input

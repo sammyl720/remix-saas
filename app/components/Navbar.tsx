@@ -5,7 +5,7 @@ import { UserProfile } from '~/types/profile';
 export default function Navbar() {
   const data = useLoaderData<{ user?: UserProfile }>();
   const user = data?.user;
-  
+
   return (
     <nav className="bg-white dark:bg-teal-950 shadow-md">
       <div className="container mx-auto p-4 flex justify-between items-center">
@@ -16,7 +16,8 @@ export default function Navbar() {
           {user ? (
             <>
               <span className="mr-4">
-                Hello, {user.email} ({user.profile?.subscription_status || 'Free'})
+                Hello, {user.email} (
+                {user.profile?.subscription_status || 'Free'})
               </span>
               <Link to="/pricing" className="mr-4">
                 Upgrade

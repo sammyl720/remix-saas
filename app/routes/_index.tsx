@@ -2,7 +2,7 @@ import { LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { getUser } from '~/utils/session.server';
 
-export const loader = async ({ request }: LoaderFunctionArgs ) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await getUser(request);
   if (!user) return redirect('/login');
   return { user };
