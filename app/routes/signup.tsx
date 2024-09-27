@@ -26,7 +26,7 @@ export const action = async ({ request }: ActionFunctionArgs ) => {
 export default function Signup() {
   const actionData = useActionData<ActionError>();
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow">
+    <div className="max-w-md mx-auto mt-12 bg-white dark:bg-teal-950 p-8 rounded shadow">
       <h1 className="text-3xl font-bold mb-6 text-center">Create an Account</h1>
       {actionData?.error && (
         <p className="text-red-500 mb-4 text-center">{actionData.error}</p>

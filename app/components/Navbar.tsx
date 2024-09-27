@@ -1,19 +1,25 @@
-import { Link, Form, useLoaderData } from '@remix-run/react';
-import { User } from '@supabase/supabase-js';
+// app/components/Navbar.tsx
+import { Link, useLoaderData, Form } from '@remix-run/react';
+import { UserProfile } from '~/types/profile';
 
 export default function Navbar() {
-  const { user } = useLoaderData<{ user?: User}>();
+  const { user } = useLoaderData<{ user?: UserProfile }>();
 
   return (
-    <nav className="shadow-md">
+    <nav className="bg-white dark:bg-teal-950 shadow-md">
       <div className="container mx-auto p-4 flex justify-between items-center">
         <Link to="/" className="text-xl font-bold">
-          RemixAuth
+          Remix SaaS
         </Link>
         <div>
           {user ? (
             <>
-              <span className="mr-4">Hello, {user.email}</span>
+              <span className="mr-4">
+                Hello, {user.email} ({user.profile?.subscription_status || 'Free'})
+              </span>
+              <Link to="/pricing" className="mr-4">
+                Upgrade
+              </Link>
               <Form method="post" action="/logout" className="inline">
                 <button
                   type="submit"

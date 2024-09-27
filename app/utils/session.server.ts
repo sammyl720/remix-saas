@@ -1,5 +1,6 @@
 import { createCookieSessionStorage, redirect } from '@remix-run/node';
 import { supabaseServer } from './supabaseServer';
+import { Profile, UserProfile } from '~/types/profile';
 
 const sessionSecret = process.env.SESSION_SECRET!;
 if (!sessionSecret) {
@@ -31,7 +32,7 @@ export async function createUserSession(accessToken: string, refreshToken: strin
   });
 }
 
-export async function getUser(request: Request) {
+export async function getUser(request: Request): Promise<UserProfile | null > {
   const session = await getSession(request.headers.get('Cookie'));
   const accessToken = session.get('access_token');
 
@@ -39,6 +40,13 @@ export async function getUser(request: Request) {
 
   const { data, error } = await supabaseServer.auth.getUser(accessToken);
 
-  if (error) return null;
-  return data.user;
+  if (error || !data.user ) return null;
+
+  const { data: profile }: { data: Profile | null } = await supabaseServer
+    .from('profiles')
+    .select('*, subscription_status, current_period_end')
+    .eq('id', data.user.id)
+    .single();
+
+  return { ...data.user, profile };
 }

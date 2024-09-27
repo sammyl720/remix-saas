@@ -1,13 +1,13 @@
 {
-  "name": "remix-supabase-template",
+  "name": "remix-saas",
   "version": "1.0.0",
-  "description": "A Remix TypeScript template with Supabase authentication and authorization, including Docker deployment.",
+  "description": "A Remix SaaS template with Supabase and Stripe subscriptions.",
   "private": true,
   "sideEffects": false,
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sammyl720/remix-supabase-template.git"
+    "url": "git+https://github.com/sammyl720/remix-saas.git"
   },
   "keywords": [
     "remix",
@@ -36,15 +36,18 @@
     "@remix-run/node": "^2.12.1",
     "@remix-run/react": "^2.12.1",
     "@remix-run/serve": "^2.12.1",
+    "@stripe/stripe-js": "^4.5.0",
     "@supabase/supabase-js": "^2.45.4",
     "isbot": "^4.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "stripe": "^16.12.0"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.12.1",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "@types/stripe": "^8.0.417",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "autoprefixer": "^10.4.20",
