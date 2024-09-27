@@ -46,7 +46,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       },
     ],
     mode: 'subscription',
-    success_url: `${process.env.APP_URL}/success`,
+    success_url: `${process.env.APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.APP_URL}/pricing`,
   });
 
