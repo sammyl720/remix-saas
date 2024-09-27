@@ -2,6 +2,7 @@
 import { ActionFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import Stripe from 'stripe';
+import { deleteCache } from '~/utils/cache.server';
 import { supabaseServer } from '~/utils/supabaseServer';
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -36,6 +37,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           current_period_end: new Date(subscription.current_period_end * 1000),
         })
         .eq('stripe_customer_id', subscription.customer as string);
+      break;
+    case 'product.updated':
+    case 'price.updated':
+    case 'product.created':
+    case 'price.created':
+      deleteCache("pricingData");
       break;
     // ... handle other event types as needed
     default:

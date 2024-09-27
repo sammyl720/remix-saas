@@ -2,8 +2,17 @@ import { LoaderFunctionArgs } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
 import Stripe from 'stripe';
 import { PricingData } from '~/types/pricing-data';
+import { getCache, setCache } from '~/utils/cache.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const cacheKey = 'pricingData';
+
+  const cachedData = getCache<PricingData[]>(cacheKey);
+
+  if (cachedData) {
+    return { pricingData: cachedData }
+  }
+
   try {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -15,7 +24,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         active: true,
         expand: ['data.product'],
       });
-      
+
       // Combine products and prices
       const pricingData: PricingData[] = prices.data
       .filter((price) => price.type === 'recurring')
@@ -33,6 +42,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       .filter((pricing) => !!pricing.unitAmount)
       .sort((priceA, priceB) => priceA.unitAmount! > priceB.unitAmount! ? -1 : 1)
 
+    // Store data in cache
+    setCache(cacheKey, pricingData);
+    
     return { pricingData };
   } catch (error) {
     console.error('Error fetching pricing data:', error);
